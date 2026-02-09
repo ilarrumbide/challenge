@@ -27,7 +27,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ### Buscar nombres similares
 
 ```bash
-GET /search?name={nombre}&threshold={umbral}&limit={max_resultados}&use_blocking={true|false}&spanish_mode={true|false}
+GET /search?name={nombre}&threshold={umbral}&limit={max_resultados}&use_blocking={true|false}
 ```
 
 **Parámetros:**
@@ -35,18 +35,12 @@ GET /search?name={nombre}&threshold={umbral}&limit={max_resultados}&use_blocking
 - `threshold` (float, opcional, default=70): Umbral mínimo de similitud (0-100)
 - `limit` (int, opcional, default=100): Máximo número de resultados a retornar (1-1000)
 - `use_blocking` (bool, opcional, default=true): Usar bloqueo por prefijo para mejor rendimiento
-- `spanish_mode` (bool, opcional, default=false): Activar procesamiento de nombres españoles
 
 **Ejemplos:**
 
 Búsqueda básica:
 ```bash
 curl "http://localhost:8000/search?name=Juan%20Garcia&threshold=80"
-```
-
-Búsqueda con modo español (resuelve apodos):
-```bash
-curl "http://localhost:8000/search?name=Pepe%20Garcia&spanish_mode=true"
 ```
 
 Búsqueda limitada a top 10 resultados:
@@ -118,12 +112,11 @@ ml-challenge/
 - **Eliminación de títulos**: Remueve prefijos como Dr., Lic., Col., Mg., Sr., Sra. (476 registros)
 
 ### Funcionalidad
-- **Modo Español (opcional)**: Resolución de 20+ apodos comunes (Pepe→José, Paco→Francisco, etc.)
 - **Control de resultados**: Parámetro `limit` para definir cantidad máxima de matches
 - **Búsqueda configurable**: Activar/desactivar bloqueo por prefijo según necesidad
 
 ### Calidad
-- **42 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
+- **34 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
 - **Tests de sanitización**: Validación de limpieza de caracteres corruptos
 - **Tests de blocking**: Verificación de indexación por prefijo
 
@@ -158,32 +151,25 @@ Reduce el espacio de comparación de N a ~N/676:
 Limpieza automática del dataset:
 - **Sanitización de caracteres**: Elimina ( ) ~ $ @ & (77 registros afectados)
 - **Eliminación de títulos**: Remueve Dr., Lic., Col., Mg., Sr., Sra. (476 registros)
-- **Resolución de apodos** (opcional): Pepe→José, Paco→Francisco, etc.
-- Configurable vía parámetro `spanish_mode`
 
 ### Pipeline de preprocesamiento
 
-**Normalización automática (siempre activa):**
+**Normalización automática:**
 1. Sanitización de caracteres corruptos
 2. Eliminación de títulos (Dr., Lic., etc.)
 3. Conversión a minúsculas
 4. Normalización Unicode (NFD) y eliminación de acentos
 5. Colapso de espacios múltiples
 
-**Modo español (spanish_mode=true, opcional):**
-1. Normalización automática
-2. Resolución de apodos comunes (Pepe→José, etc.)
-
 ### Ejemplos de similitud
 
-| Nombre 1 | Nombre 2 | Modo | Similitud |
-|----------|----------|------|-----------|
-| Juan García | juan garcia | Estándar | 100% |
-| María López | maria lopez | Estándar | 100% |
-| Juan García | Juan Garsia | Estándar | ~95% |
-| Dr. Juan García | Juan García | Estándar | 100% |
-| Pepe García | José García | Español | 100% |
-| Juan García | Pedro López | Estándar | ~55% |
+| Nombre 1 | Nombre 2 | Similitud |
+|----------|----------|-----------|
+| Juan García | juan garcia | 100% |
+| María López | maria lopez | 100% |
+| Juan García | Juan Garsia | ~95% |
+| Dr. Juan García | Juan García | 100% |
+| Juan García | Pedro López | ~55% |
 
 ---
 

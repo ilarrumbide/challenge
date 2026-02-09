@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.normalizer import normalize, normalize_spanish
+from app.services.normalizer import normalize
 
 
 class TestNormalize:
@@ -57,43 +57,3 @@ class TestNormalize:
         assert normalize("Sra. Ana Fernández") == "ana fernandez"
         assert normalize("Mg. Carlos Díaz") == "carlos diaz"
         assert normalize("Sr. Luis Rodríguez") == "luis rodriguez"
-
-
-class TestNormalizeSpanish:
-    """Test cases for Spanish-specific normalization."""
-
-    def test_particle_removal(self):
-        assert normalize_spanish("Juan de la Cruz") == "juan cruz"
-        assert normalize_spanish("María del Carmen García") == "maria carmen garcia"
-        assert normalize_spanish("Pedro de los Santos") == "pedro santos"
-
-    def test_nickname_resolution(self):
-        assert normalize_spanish("Pepe García") == "jose garcia"
-        assert normalize_spanish("Paco Rodríguez") == "francisco rodriguez"
-        assert normalize_spanish("Nacho López") == "ignacio lopez"
-        assert normalize_spanish("Lupe Martínez") == "guadalupe martinez"
-
-    def test_combined_particles_and_nicknames(self):
-        # Test both particle removal and nickname resolution
-        result = normalize_spanish("Pepe de la Cruz")
-        assert result == "jose cruz"
-
-    def test_y_particle_removal(self):
-        # Test "y" particle (common in compound surnames)
-        assert normalize_spanish("García y López") == "garcia lopez"
-
-    def test_preserves_regular_names(self):
-        # Names without particles or nicknames should just be normalized
-        assert normalize_spanish("Juan García López") == "juan garcia lopez"
-
-    def test_empty_string(self):
-        assert normalize_spanish("") == ""
-
-    def test_case_insensitive_nicknames(self):
-        # Nicknames should work regardless of case
-        assert normalize_spanish("PEPE GARCÍA") == "jose garcia"
-        assert normalize_spanish("Pepe García") == "jose garcia"
-
-    def test_multiple_nicknames(self):
-        # Test name with multiple nicknames
-        assert normalize_spanish("Pepe y Paco") == "jose francisco"

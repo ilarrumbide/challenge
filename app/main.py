@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query
 
 from app.repositories.names import NamesRepository
-from app.services.normalizer import normalize_spanish
+from app.services.normalizer import normalize
 from app.services.similarity import calculate_similarity
 
 names_repo: NamesRepository | None = None
@@ -39,9 +39,6 @@ async def search_names(
     use_blocking: bool = Query(
         True, description="Use prefix blocking to reduce search space (faster for large datasets)"
     ),
-    spanish_mode: bool = Query(
-        False, description="Enable Spanish name processing (particles, nicknames)"
-    ),
 ) -> dict[str, Any]:
     """
     Search for similar names in the database.
@@ -50,23 +47,19 @@ async def search_names(
     the found name and its similarity percentage, sorted by similarity (descending).
 
     Performance tip: use_blocking=True reduces comparisons significantly for large datasets.
-    Spanish mode: Handles particles (de, del) and nicknames (Pepe->Jose).
     """
     if names_repo is None:
         raise HTTPException(status_code=503, detail="Service not initialized")
 
-    query_name = normalize_spanish(name) if spanish_mode else name
-
     results = []
 
     if use_blocking:
-        candidates = names_repo.candidates_for(query_name)
+        candidates = names_repo.candidates_for(name)
     else:
         candidates = list(names_repo)
 
     for record_id, db_name in candidates:
-        db_name_processed = normalize_spanish(db_name) if spanish_mode else db_name
-        similarity = calculate_similarity(query_name, db_name_processed)
+        similarity = calculate_similarity(name, db_name)
         if similarity >= threshold:
             results.append((record_id, db_name, similarity))
 

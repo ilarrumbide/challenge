@@ -79,24 +79,13 @@ Cuando normalizamos "Dr. Juan García", si no removemos el título, el prefijo d
 ### 4. Partículas Españolas (código presente, no necesario)
 
 **Situación:**
-El código para manejar "de", "del", "de la", etc. está implementado en `normalize_spanish()`, pero el dataset no tiene ningún nombre con estas partículas (0%).
+El código para manejar "de", "del", "de la", etc. está implementado con el parámetro `remove_particles`, pero el dataset no tiene ningún nombre con estas partículas (0%).
 
 **Decisión:**
 Mantener el código porque:
-- No afecta performance (solo se activa con `spanish_mode=true`)
+- No afecta performance (solo se activa si se pasa `remove_particles=True`)
 - Si el dataset cambia en el futuro, ya está listo
-- Es útil para nombres españoles en general, aunque este dataset particular no los tenga
-
-### 5. Apodos Españoles (implementado, opcional)
-
-**Qué hace:**
-Resuelve 20+ apodos comunes: Pepe→José, Paco→Francisco, Nacho→Ignacio, etc.
-
-**Uso:**
-Solo activo cuando el usuario pasa `spanish_mode=true` en el API
-
-**Decisión:**
-Mantener porque mejora el recall para búsquedas con nombres informales, aunque no sabemos la frecuencia exacta de apodos en el dataset.
+- Es útil para casos específicos donde sea necesario
 
 ### 6. Estrategia de Bloqueo por Prefijo
 
@@ -157,7 +146,7 @@ El challenge pedía lo siguiente:
 
 ## Notas Técnicas
 
-**Tests:** 42 tests pasando (incluyendo 11 nuevos para sanitización y títulos)
+**Tests:** 34 tests pasando (incluyendo 11 para sanitización y títulos)
 
 **Compatibilidad:** 100% backward compatible - todos los endpoints existentes funcionan igual
 
