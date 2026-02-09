@@ -116,7 +116,7 @@ ml-challenge/
 - **Búsqueda configurable**: Activar/desactivar bloqueo por prefijo según necesidad
 
 ### Calidad
-- **34 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
+- **33 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
 - **Tests de sanitización**: Validación de limpieza de caracteres corruptos
 - **Tests de blocking**: Verificación de indexación por prefijo
 

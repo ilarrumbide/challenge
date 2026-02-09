@@ -76,18 +76,7 @@ Cuando normalizamos "Dr. Juan García", si no removemos el título, el prefijo d
 - Antes: "Dr. Juan García" → prefijo "dr" → grupo equivocado
 - Después: "Juan García" → prefijo "ju" → grupo correcto
 
-### 4. Partículas Españolas (código presente, no necesario)
-
-**Situación:**
-El código para manejar "de", "del", "de la", etc. está implementado con el parámetro `remove_particles`, pero el dataset no tiene ningún nombre con estas partículas (0%).
-
-**Decisión:**
-Mantener el código porque:
-- No afecta performance (solo se activa si se pasa `remove_particles=True`)
-- Si el dataset cambia en el futuro, ya está listo
-- Es útil para casos específicos donde sea necesario
-
-### 6. Estrategia de Bloqueo por Prefijo
+### 5. Estrategia de Bloqueo por Prefijo
 
 **Implementación actual: 2 caracteres**
 - Promedio: 156 candidatos por query
@@ -146,7 +135,7 @@ El challenge pedía lo siguiente:
 
 ## Notas Técnicas
 
-**Tests:** 34 tests pasando (incluyendo 11 para sanitización y títulos)
+**Tests:** 33 tests pasando (incluyendo 11 para sanitización y títulos)
 
 **Compatibilidad:** 100% backward compatible - todos los endpoints existentes funcionan igual
 

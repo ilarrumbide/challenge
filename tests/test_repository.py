@@ -53,7 +53,7 @@ class TestNamesRepository:
 
         # Query starting with "Juan" should find Juan-prefixed names
         candidates = repo.candidates_for("Juan García")
-        candidate_names = [name for _, name in candidates]
+        candidate_names = [name for _, name, _ in candidates]
 
         # Should find names starting with "ju" (juan, juana)
         assert "Juan García López" in candidate_names
@@ -104,9 +104,10 @@ class TestNamesRepository:
         repo.load()
 
         count = 0
-        for record_id, name in repo:
+        for record_id, name, normalized in repo:
             assert isinstance(record_id, int)
             assert isinstance(name, str)
+            assert isinstance(normalized, str)
             count += 1
 
         assert count == 7

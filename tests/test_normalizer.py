@@ -36,13 +36,6 @@ class TestNormalize:
         # Keeps alphanumeric and spaces
         assert normalize("Juan-García") == "juan-garcia"
 
-    def test_remove_particles_option(self):
-        # Test particle removal option
-        assert normalize("Juan de la Cruz", remove_particles=True) == "juan cruz"
-        assert normalize("María del Carmen", remove_particles=True) == "maria carmen"
-        # Without the option, particles are kept
-        assert normalize("Juan de la Cruz", remove_particles=False) == "juan de la cruz"
-
     def test_sanitize_corrupted_characters(self):
         assert normalize("Isabel R(odríguez García") == "isabel rodriguez garcia"
         assert normalize("Pablo Góme&z") == "pablo gomez"
