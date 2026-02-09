@@ -44,9 +44,9 @@ Búsqueda básica:
 curl "http://localhost:8000/search?name=Juan%20Garcia&threshold=80"
 ```
 
-Búsqueda con modo español (maneja partículas y apodos):
+Búsqueda con modo español (resuelve apodos):
 ```bash
-curl "http://localhost:8000/search?name=Pepe%20de%20la%20Cruz&spanish_mode=true"
+curl "http://localhost:8000/search?name=Pepe%20Garcia&spanish_mode=true"
 ```
 
 Búsqueda limitada a top 10 resultados:
@@ -70,7 +70,7 @@ GET /health
 
 **Respuesta:**
 ```json
-{"status": "healthy", "records_loaded": 1000}
+{"status": "healthy", "records_loaded": 5000}
 ```
 
 ### Documentación interactiva
@@ -109,22 +109,22 @@ ml-challenge/
 
 ---
 
-## Mejoras Implementadas
+## Características Principales
 
 ### Performance
-- **RapidFuzz**: Reemplazo de implementación Python pura por librería optimizada en C++ (10-50x más rápida)
+- **RapidFuzz**: Librería optimizada en C++ con soporte SIMD para cálculo de similitud
 - **Prefix Blocking**: Sistema de indexación por prefijo que reduce comparaciones de O(N) a O(N/k)
-- **Limit Parameter**: Control de resultados máximos para prevenir respuestas excesivamente grandes
+- **Sanitización de datos**: Limpia caracteres corruptos en nombres (afecta 77 registros del dataset)
+- **Eliminación de títulos**: Remueve prefijos como Dr., Lic., Col., Mg., Sr., Sra. (476 registros)
 
 ### Funcionalidad
-- **Modo Español**: Soporte específico para nombres hispanos con:
-  - 20+ apodos comunes (Pepe, Paco, Nacho, Lupe, etc.)
-  - Eliminación de partículas (de, del, de la, de los, de las, y)
-- **API mejorada**: Parámetros adicionales para control fino de búsqueda
+- **Modo Español (opcional)**: Resolución de 20+ apodos comunes (Pepe→José, Paco→Francisco, etc.)
+- **Control de resultados**: Parámetro `limit` para definir cantidad máxima de matches
+- **Búsqueda configurable**: Activar/desactivar bloqueo por prefijo según necesidad
 
 ### Calidad
-- **40 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
-- **Tests de Spanish mode**: Validación de partículas y apodos
+- **42 tests unitarios**: Cobertura completa de normalización, similitud y repositorio
+- **Tests de sanitización**: Validación de limpieza de caracteres corruptos
 - **Tests de blocking**: Verificación de indexación por prefijo
 
 ---
@@ -141,8 +141,8 @@ ml-challenge/
 
 ### Implementación: RapidFuzz
 
-Utilizamos [RapidFuzz](https://github.com/rapidfuzz/RapidFuzz), una implementación optimizada en C++ con soporte SIMD:
-- **10-50x más rápido** que implementaciones en Python puro
+Utilizamos [RapidFuzz](https://github.com/rapidfuzz/RapidFuzz), implementación optimizada en C++ con soporte SIMD:
+- Librería de referencia para fuzzy matching en Python
 - Complejidad O(|S1|×|S2|) optimizada con operaciones bitwise
 - Ampliamente usada en producción (Pandas, Polars, etc.)
 
@@ -154,25 +154,25 @@ Reduce el espacio de comparación de N a ~N/676:
 - Solo compara nombres con prefijos similares
 - Configurable vía parámetro `use_blocking`
 
-#### 2. Modo Español
-Mejora precisión para nombres hispanos:
-- **Eliminación de partículas**: "de", "del", "de la", "de los", "de las"
-- **Resolución de apodos**: Pepe→Jose, Paco→Francisco, Nacho→Ignacio, etc.
+#### 2. Normalización de Datos
+Limpieza automática del dataset:
+- **Sanitización de caracteres**: Elimina ( ) ~ $ @ & (77 registros afectados)
+- **Eliminación de títulos**: Remueve Dr., Lic., Col., Mg., Sr., Sra. (476 registros)
+- **Resolución de apodos** (opcional): Pepe→José, Paco→Francisco, etc.
 - Configurable vía parámetro `spanish_mode`
 
 ### Pipeline de preprocesamiento
 
-**Modo estándar:**
-1. Conversión a minúsculas
-2. Normalización Unicode (NFD)
-3. Eliminación de acentos
-4. Colapso de espacios múltiples
-5. Trim de espacios
+**Normalización automática (siempre activa):**
+1. Sanitización de caracteres corruptos
+2. Eliminación de títulos (Dr., Lic., etc.)
+3. Conversión a minúsculas
+4. Normalización Unicode (NFD) y eliminación de acentos
+5. Colapso de espacios múltiples
 
-**Modo español (spanish_mode=true):**
-1. Pipeline estándar
-2. Resolución de apodos comunes
-3. Eliminación de partículas
+**Modo español (spanish_mode=true, opcional):**
+1. Normalización automática
+2. Resolución de apodos comunes (Pepe→José, etc.)
 
 ### Ejemplos de similitud
 
@@ -181,8 +181,8 @@ Mejora precisión para nombres hispanos:
 | Juan García | juan garcia | Estándar | 100% |
 | María López | maria lopez | Estándar | 100% |
 | Juan García | Juan Garsia | Estándar | ~95% |
-| Pepe García | Jose García | Español | 100% |
-| Juan de la Cruz | Juan Cruz | Español | 100% |
+| Dr. Juan García | Juan García | Estándar | 100% |
+| Pepe García | José García | Español | 100% |
 | Juan García | Pedro López | Estándar | ~55% |
 
 ---
